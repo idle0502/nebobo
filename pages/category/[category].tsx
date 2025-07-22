@@ -1,9 +1,7 @@
-// 📁 pages/category/[category].tsx
-
 import fs from 'fs/promises';
 import path from 'path';
-import { GetStaticPaths, GetStaticProps } from 'next';
-import Card from '@/components/Card';
+import type { GetStaticPaths, GetStaticProps } from 'next';
+import Card from '../../components/Card';
 
 type Props = {
   category: string;
