@@ -1,43 +1,48 @@
-// app/page.tsx (또는 pages/index.tsx)
-import Link from 'next/link';
+import fs from 'fs';
+import path from 'path';
 import Image from 'next/image';
+import styles from '../styles/home.module.css';
+import { CardData } from '../types';
 
-const categories = [
-  { key: 'Broadcast_Stage', label: 'Broadcast Stage', thumbnail: '/thumbs/broadcast_stage.jpg' },
-  { key: 'Commercials', label: 'Commercials', thumbnail: '/thumbs/commercials.jpg' },
-  { key: 'Etc', label: 'Etc', thumbnail: '/thumbs/etc.jpg' },
-  { key: 'Festival_Stage', label: 'Festival Stage', thumbnail: '/thumbs/festival_stage.jpg' },
-  { key: 'Interviews', label: 'Interviews', thumbnail: '/thumbs/interviews.jpg' },
-  { key: 'Live_Streams', label: 'Live Streams', thumbnail: '/thumbs/live_streams.jpg' },
-  { key: 'Media_Content', label: 'Media Content', thumbnail: '/thumbs/media_content.jpg' },
-  { key: 'Media_Performance', label: 'Media Performance', thumbnail: '/thumbs/media_performance.jpg' },
-  { key: 'Official_Channel', label: 'Official Channel', thumbnail: '/thumbs/official_channel.jpg' },
-  { key: 'Original_Variety', label: 'Original Variety', thumbnail: '/thumbs/original_variety.jpg' },
-  { key: 'Radio_Podcast', label: 'Radio Podcast', thumbnail: '/thumbs/radio_podcast.jpg' },
-  { key: 'Recording_Behind', label: 'Recording Behind', thumbnail: '/thumbs/recording_behind.jpg' },
-  { key: 'Releases', label: 'Releases', thumbnail: '/thumbs/Releases.jpg' },
-  { key: 'Shorts', label: 'Shorts', thumbnail: '/thumbs/shorts.jpg' },
-  { key: 'Special_Releases', label: 'Special Releases', thumbnail: '/thumbs/special_releases.jpg' },
-];
+export async function getStaticProps() {
+  const dataDir = path.join(process.cwd(), 'data');
+  const files = fs.readdirSync(dataDir);
+  let cards: CardData[] = [];
 
+  files.forEach(file => {
+    const filePath = path.join(dataDir, file);
+    const fileData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    cards = cards.concat(fileData);
+  });
 
-export default function HomePage() {
+  return {
+    props: {
+      cards,
+    },
+  };
+}
+
+export default function Home({ cards }: { cards: CardData[] }) {
   return (
-    <main className="flex flex-wrap justify-center gap-6 p-8">
-      {categories.map((category) => (
-        <Link key={category.key} href={`/category/${category.key}`}>
-          <div className="flex flex-col items-center hover:opacity-80 transition">
+    <div className={styles.container}>
+      <h1 className={styles.title}>카테고리별 영상</h1>
+      <div className={styles.grid}>
+        {cards.map((card, index) => (
+          <a key={index} href={`/category/${card.category}`} className={styles.card}>
             <Image
-              src={category.thumbnail}
-              alt={category.label}
-              width={240}
-              height={135}
-              className="rounded-xl shadow-md"
+              src={`/api/card-image?title=${encodeURIComponent(card.title)}&member=${encodeURIComponent(card.member)}&date=${card.date}&thumbnail=${encodeURIComponent(card.thumbnail)}`}
+              alt={card.alt}
+              width={320}
+              height={180}
+              className={styles.thumbnail}
             />
-            <div className="mt-2 text-center text-white font-semibold">{category.label}</div>
-          </div>
-        </Link>
-      ))}
-    </main>
+            <div className={styles.meta}>
+              <p className={styles.titleText}>{card.title}</p>
+              <p className={styles.subText}>{card.member} ・ {card.date}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
