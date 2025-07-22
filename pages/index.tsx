@@ -25,7 +25,7 @@ export default function HomePage() {
   return (
     <main className="flex flex-wrap justify-center gap-6 p-8">
       {categories.map((category) => (
-        <Link key={category.key} href={`/category/?cate=${category.key}`}>
+        <Link key={category.key} href={`/category/${category.key}`}>
           <div className="flex flex-col items-center hover:opacity-80 transition">
             <Image
               src={category.thumbnail}
