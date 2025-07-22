@@ -1,25 +1,26 @@
 import Link from 'next/link';
 
-type CardProps = {
+type Props = {
   card: {
     id: string;
     category: string;
     title: string;
     thumbnail: string;
-    alt?: string;
+    alt: string;
   };
 };
 
-export default function Card({ card }: CardProps) {
+export default function Card({ card }: Props) {
   return (
     <Link href={`/category/${card.category}`}>
-      <div style={{ border: '1px solid #ccc', padding: 10 }}>
+      <div>
         <img
           src={`/api/card-image?cate=${card.category}&id=${card.id}`}
-          alt={card.alt || ''}
-          style={{ width: '100%', height: 'auto' }}
+          alt={card.alt}
+          width={400}
+          height={225}
         />
-        <h2>{card.title}</h2>
+        <h3>{card.title}</h3>
       </div>
     </Link>
   );

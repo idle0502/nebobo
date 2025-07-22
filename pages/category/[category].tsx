@@ -1,7 +1,7 @@
-import { GetStaticPaths, GetStaticProps } from 'next';
-import path from 'path';
 import fs from 'fs';
-import { CardData } from '../types';
+import path from 'path';
+import { GetStaticPaths, GetStaticProps } from 'next';
+import { CardData } from '../../types';
 import Image from 'next/image';
 
 type Props = {
@@ -27,22 +27,22 @@ export default function CategoryPage({ category, cards }: Props) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const files = fs.readdirSync(path.join(process.cwd(), 'data'));
-  const paths = files.map((file) => ({
-    params: { category: file.replace('cards-', '').replace('.json', '') },
-  }));
+  const dataDir = path.join(process.cwd(), 'data');
+  const files = fs.readdirSync(dataDir);
+  const paths = files
+    .filter((file) => file.startsWith('cards-') && file.endsWith('.json'))
+    .map((file) => ({
+      params: { category: file.replace('cards-', '').replace('.json', '') },
+    }));
 
-  return {
-    paths,
-    fallback: false,
-  };
+  return { paths, fallback: false };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const category = params?.category as string;
   const filePath = path.join(process.cwd(), 'data', `cards-${category}.json`);
   const fileContent = fs.readFileSync(filePath, 'utf8');
-  const cards = JSON.parse(fileContent);
+  const cards: CardData[] = JSON.parse(fileContent);
 
   return {
     props: {
