@@ -1,51 +1,19 @@
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
-import type { GetStaticPaths, GetStaticProps } from 'next';
-import Card from '../../components/Card';
-
-type Props = {
-  category: string;
-  cards: any[];
-};
-
-export default function CategoryPage({ category, cards }: Props) {
-  return (
-    <main>
-      <h1>{category} 카테고리</h1>
-      <div style={{ display: 'grid', gap: 20 }}>
-        {cards.map((card, index) => (
-          <Card key={index} card={card} />
-        ))}
-      </div>
-    </main>
-  );
-}
+import { GetStaticPaths, GetStaticProps } from 'next';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const dataDir = path.join(process.cwd(), 'data');
-  const files = await fs.readdir(dataDir);
+  const files = fs.readdirSync(dataDir);
 
-  const paths = files
-    .filter(file => file.startsWith('cards-'))
-    .map(file => {
-      const category = file.replace('cards-', '').replace('.json', '');
-      return { params: { category } };
-    });
+  // cards-카테고리이름.json → 카테고리 추출
+  const categories = files
+    .filter((file) => file.startsWith('cards-') && file.endsWith('.json'))
+    .map((file) => file.replace('cards-', '').replace('.json', ''));
+
+  const paths = categories.map((category) => ({
+    params: { category },
+  }));
 
   return { paths, fallback: false };
-};
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const category = params?.category as string;
-  const safeCategory = category.replace(/[^a-zA-Z0-9]/g, '_');
-  const filePath = path.join(process.cwd(), 'data', `cards-${safeCategory}.json`);
-  const fileData = await fs.readFile(filePath, 'utf-8');
-  const cards = JSON.parse(fileData);
-
-  return {
-    props: {
-      category,
-      cards,
-    },
-  };
 };
